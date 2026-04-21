@@ -20,3 +20,8 @@ Validation labels 选择非None，右边的文件选择框使能
 运行成功后
 ![alt text](image-2.png)
 Quantization History里会多一条目录，Probability Density Histogram里展示图像。
+
+
+![alt text](image-6.png)
+
+![alt text](image-7.png)
