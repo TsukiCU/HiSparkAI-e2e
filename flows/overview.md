@@ -41,15 +41,15 @@ Home → Select Model → Quantize → Convert → Deploy → Benchmark
 
 ## Test Data
 
-Located at `data/mnist/` (for the mnist-12.onnx model):
 ```
 data/
-└── mnist/
-    ├── mnist-12.onnx       ← model file (used in Select Model)
-    ├── cali/               ← calibration data folder (Quantize: Calibration Inputs)
-    ├── vali/               ← validation data folder (Quantize: Validation Inputs)
-    └── label.csv           ← labels file (Quantize: Validation Labels)
+├── cali/           ← calibration data (.npy files) — Quantize: Calibration Inputs
+├── vali/           ← validation data (.npy files)  — Quantize: Validation Inputs
+├── label.csv       ← labels file                   — Quantize: Validation Labels
+└── backup/         ← backup copies, ignore in tests
 ```
+
+The model file (mnist-12.onnx) is expected to be pre-imported into the extension's History Files before tests run. Tests do not import the model — they select it from history.
 
 All file path inputs in the UI accept direct text entry. In tests, fill these paths directly without using file dialogs.
 

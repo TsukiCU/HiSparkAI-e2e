@@ -21,11 +21,10 @@ HiSparkAI/
 │       │   └── component/        Shared UI components
 │       └── backEnd/              Extension Host logic, panel management
 ├── data/          Pre-existing test datasets — use these as test fixtures
-│   └── mnist/
-│       ├── mnist-12.onnx         model file
-│       ├── cali/                 calibration data folder
-│       ├── vali/                 validation data folder
-│       └── label.csv             labels file
+│   ├── cali/                     calibration data (.npy files)
+│   ├── vali/                     validation data (.npy files)
+│   ├── label.csv                 labels file
+│   └── backup/                   backup copies (ignore in tests)
 ├── e2e/           THIS project — Playwright E2E tests  ← you are here
 │   ├── CLAUDE.md  (this file)
 │   └── flows/     UI documentation — READ BEFORE WRITING TESTS
@@ -89,7 +88,12 @@ Use `frameLocator` chaining to reach it. Cache the inner frame reference in a sh
 After VSCode launches, the extension activates asynchronously. Always wait for a known stable element before interacting. Add a `data-testid="app-ready"` marker to the root component and use it as the readiness gate.
 
 ### 3. File Path Inputs Accept Direct Text — Use This
-**All file path inputs in the UI support direct text entry.** Use `fill()` with absolute paths pointing to `../data/mnist/`. Do not interact with the folder-picker icon buttons. Do not attempt to automate OS file dialogs.
+**All file path inputs in the UI support direct text entry.** Use `fill()` with absolute paths pointing to `../data/`. The correct test data paths are:
+- Calibration Inputs: `<repo_root>/data/cali/`
+- Validation Inputs: `<repo_root>/data/vali/`
+- Validation Labels file: `<repo_root>/data/label.csv`
+
+Always resolve paths with `path.resolve()` relative to the test file location — never hardcode absolute paths. Do not interact with the folder-picker icon buttons. Do not attempt to automate OS file dialogs.
 
 ### 4. Import New Model is Not Automatable
 "Import New Model" on Select Model page opens either an OS-native file dialog (Windows/WSL) or an SSH-based remote plugin (Linux). Neither is automatable with Playwright. Tests must pre-seed model history or use a model already present in History Files.
