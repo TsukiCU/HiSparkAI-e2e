@@ -1,0 +1,137 @@
+--- a/code/src/frontEnd/routes/app.tsx
++++ b/code/src/frontEnd/routes/app.tsx
+@@ -57,7 +57,7 @@
+   }, [messageHandler]);
+ 
+   return (
+-    <div className="chip-setting">
++    <div className="chip-setting" data-testid="app-ready">
+       <HashRouter>
+         <Routes>
+           <Route path="/" element={<Navbar />}>
+--- a/code/src/frontEnd/routes/SelectModel.tsx
++++ b/code/src/frontEnd/routes/SelectModel.tsx
+@@ -137,8 +137,8 @@
+       dataIndex: 'time',
+       align: 'right',
+       render: (val: any, record: historyDataType) => (<div className="Next-bt">
+-        <img onClick={(): void => deleteData(val)} src={TrashIcon} alt="icon" style={{ cursor: 'pointer', width: '20px', height: '20px' }} />
+-        <Button className="Next" type="primary" onClick={(): void => handleNextClick(val, record.name.modelName)}>
++        <img data-testid="history-delete-btn" onClick={(): void => deleteData(val)} src={TrashIcon} alt="icon" style={{ cursor: 'pointer', width: '20px', height: '20px' }} />
++        <Button data-testid="history-next-btn" className="Next" type="primary" onClick={(): void => handleNextClick(val, record.name.modelName)}>
+           Next
+         </Button>
+       </div>),
+--- a/code/src/frontEnd/routes/Quantize.tsx
++++ b/code/src/frontEnd/routes/Quantize.tsx
+@@ -1113,7 +1113,8 @@
+                               Validation Labels
+                             </label>
+                             <Select
+-                                              style={{ width: 170 }}
++                              data-testid="validation-labels-select"
++                              style={{ width: 170 }}
+                               placeholder="请选择输出节点"
+                               value={selectedOutput}
+                               onChange={setSelectedOutput}
+@@ -1288,6 +1289,7 @@
+             customEditableStyle={{
+               marginRight: '15px',
+             }}
++            testId="validation-toggle"
+           />
+         )),
+         ...cpuBitNumSelect.map((selectBox, i) => (
+@@ -1449,7 +1451,8 @@
+                       Validation Labels
+                     </label>
+                     <Select
+-                              style={{ width: 170 }}
++                      data-testid="validation-labels-select"
++                      style={{ width: 170 }}
+                       placeholder="请选择输出节点"
+                       value={selectedOutput}
+                       onChange={setSelectedOutput}
+@@ -1469,7 +1472,7 @@
+               }
+               rows.push(
+                 <div>
+-                  <Button className="left-bt"
++                  <Button data-testid="quantize-btn" className="left-bt"
+                     type='primary'
+                     onClick={(e): void => {
+                       e.stopPropagation();
+@@ -1514,7 +1517,7 @@
+           <ImageInfo modelName={model} />
+           <span style={{ marginLeft: '8px', fontSize: '18px' }}>{model}</span>
+         </div>
+-        {target === 'CPU' && <Button className="left-bt next-without-quantization"
++        {target === 'CPU' && <Button data-testid="skip-quantization-btn" className="left-bt next-without-quantization"
+           type='primary'
+           onClick={(e): void => {
+             e.stopPropagation();
+@@ -1531,7 +1534,9 @@
+ 
+       <div className='results-style'>
+         <CommonCard title={'Quantization Result History'} width={'56.5vw'} children={<History nextPage='../convert' target={target} activeTab={activeTab} />} />
+-        <CommonCard title={'Probability Density Histogram'} chartChange={chartChange} width={'33vw'} children={histogramCfgData.length > 0 ? <HistogramGraph width={sharedChartConfig.width} height={sharedChartConfig.height} overflowX={sharedChartConfig.overflowX} histogramGraphData={histogramCfgData} /> : <Empty style={{ height: '300px' }}/>} />
++        <div data-testid="histogram-section">
++          <CommonCard title={'Probability Density Histogram'} chartChange={chartChange} width={'33vw'} children={histogramCfgData.length > 0 ? <HistogramGraph width={sharedChartConfig.width} height={sharedChartConfig.height} overflowX={sharedChartConfig.overflowX} histogramGraphData={histogramCfgData} /> : <Empty style={{ height: '300px' }}/>} />
++        </div>
+       </div>
+     </div>
+   );
+--- a/code/src/frontEnd/routes/Convert.tsx
++++ b/code/src/frontEnd/routes/Convert.tsx
+@@ -648,7 +648,7 @@
+ 
+     const convertButton = (): React.JSX.Element => {
+       return (
+-        <Button className="left-bt"
++        <Button data-testid="convert-btn" className="left-bt"
+           type='primary'
+           onClick={(e): void => {
+             e.stopPropagation();
+--- a/code/src/frontEnd/routes/utils/History.tsx
++++ b/code/src/frontEnd/routes/utils/History.tsx
+@@ -218,7 +218,7 @@
+             />
+             {nextPage !== 'none' ? (
+               <NavLink to={nextPage} state={{ params: { data: selectParams } }} onClick={(): void => toNextStep(nextPage, record)}>
+-                <button className="left-bt">Next</button>
++                <button data-testid="result-next-btn" className="left-bt">Next</button>
+               </NavLink>
+             ) : (
+               <button className="left-bt">Next</button>
+@@ -565,7 +565,7 @@
+     closeModal();
+   };
+   return (
+-    <section className="history">
++    <section data-testid="history-section" className="history">
+       <div className="history-table-info">
+         <Table<Row> rowKey="key" onRow={onRow} rowSelection={rowSelections ? rowSelections : rowSelection} columns={newColumns} dataSource={tableData} pagination={false} />
+       </div>
+--- a/code/src/frontEnd/routes/utils/Switch.tsx
++++ b/code/src/frontEnd/routes/utils/Switch.tsx
+@@ -37,10 +37,11 @@
+     customEditableStyle?: React.CSSProperties;
+     isProfile?: boolean;
+     onChange: (checked: boolean, selectKey: string) => void;
++    testId?: string;
+ }
+ 
+ const SwitchBoxComponent: React.FC<SwitchBoxComponentProps> = (prop) => {
+-    const { selectBox, labelOrP, labelWidth, transmitStyle, isProfile, customEditableStyle, onChange } = prop;
++    const { selectBox, labelOrP, labelWidth, transmitStyle, isProfile, customEditableStyle, onChange, testId } = prop;
+     const {
+         title,
+         content,
+@@ -81,6 +82,7 @@
+     return (
+         <div
+             className="switchContainer"
++            data-testid={testId}
+             style={{
+                 ...customEditableStyle,
+                 display: 'flex',
