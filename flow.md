@@ -1,4 +1,7 @@
 点击侧边栏HiSpark Studio AI的插件图标，点击Welcome下的Home进入主页面。
+![alt text](image-8.png)
+
+主页面:
 ![alt text](image.png)
 
 点击图中Open，进入选择模型的页面。从History files中选择第一个模型，点击右边的Next按钮，进入后续量化 页面。
