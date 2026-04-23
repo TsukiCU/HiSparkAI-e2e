@@ -21,12 +21,21 @@ HiSparkAI/
 │       │   └── component/        Shared UI components
 │       └── backEnd/              Extension Host logic, panel management
 ├── data/          Pre-existing test datasets — use these as test fixtures
-│   ├── lite/
-│   ├── test/
-│   └── train/
+│   └── mnist/
+│       ├── mnist-12.onnx         model file
+│       ├── cali/                 calibration data folder
+│       ├── vali/                 validation data folder
+│       └── label.csv             labels file
 ├── e2e/           THIS project — Playwright E2E tests  ← you are here
 │   ├── CLAUDE.md  (this file)
-│   └── flow.md    UI walkthrough with annotated screenshots — READ THIS FIRST
+│   └── flows/     UI documentation — READ BEFORE WRITING TESTS
+│       ├── overview.md           pipeline map, platform/SDK matrix, implementation status
+│       ├── 00-home/
+│       ├── 01-select-model/
+│       ├── 02-quantize/          contains cpu-ptq.md (✅), npu-ptq.md (❌), npu-qat.md (❌)
+│       ├── 03-convert/
+│       ├── 04-deploy/            ❌ out of scope
+│       └── 05-benchmark/         ❌ out of scope
 └── prompt/        Prompt history (ignore during implementation)
 ```
 
@@ -36,20 +45,34 @@ The plugin is a linear pipeline with 5 steps shown as a top navbar:
 
 **Select Model → Quantize → Convert → Deploy → Benchmark**
 
-Each step is a separate WebView "page". State carries forward (the selected model persists across steps). Tests should be designed to reflect this sequential nature while remaining independently runnable where feasible.
+State carries forward (the selected model persists across steps). Tests should reflect this sequential nature while remaining independently runnable where feasible.
 
-Key behaviors documented in `flow.md` (read it, look at the screenshots):
-- **Home** page has Project List, New Project, Import Project
-- **Select Model** page has History Files list and Import Model button
-- **Quantize** page has 4 distinct execution modes, a Validation toggle that reveals extra inputs, a Validation Labels dropdown that enables a file picker, and a results history table
-- **Convert** page requires no configuration — just click Convert
-- Results appear in history tables and side panels (charts/bar graphs)
+## Platform × SDK Matrix
+
+This is important for scoping tests correctly.
+
+| SDK  | Platform      | Quantize UI  | Convert UI |
+|------|---------------|-------------|------------|
+| CPU  | Windows / WSL | PTQ only    | Basic      |
+| CPU  | Linux         | Same        | Same       |
+| NPU  | Windows / WSL | PTQ + QAT   | + extra param field |
+| NPU  | Linux         | Same        | Same       |
+
+**Rules:**
+- WSL and Windows share identical WebView UI — one test covers both
+- NPU and CPU have **structurally different Quantize pages**
+- The only cross-platform UI difference is "Import New Model" in Select Model (see flows/01-select-model)
+- Deploy and Benchmark have NPU/CPU differences but are out of scope
+
+## Current Test Scope
+
+Focus on: **CPU path, Windows/WSL, from-history model selection, Select Model → Quantize → Convert**
+
+This is the only fully documented path. Do not write tests for undocumented variants.
 
 ## Technical Decisions Already Made
 
 **Framework:** Playwright with Electron launch (`_electron` API), running against a real VSCode instance with the extension loaded in development mode.
-
-**Why Playwright over other options:** The WebView is React-based and lives inside a sandboxed iframe. Playwright is the only tool that can reliably interact with both the VSCode shell and the WebView DOM in the same test.
 
 ## Critical Technical Gotchas — Read Before Writing Any Test
 
@@ -60,35 +83,38 @@ Electron window (page)
   └── iframe  (VSCode's webview host)
         └── iframe#active-frame  (your React app)
 ```
-Use `frameLocator` chaining to reach it. Cache the inner frame reference in a fixture; don't re-traverse the chain in every test.
+Use `frameLocator` chaining to reach it. Cache the inner frame reference in a shared fixture.
 
 ### 2. Extension Activation is Async
-After VSCode launches, the extension activates asynchronously. The WebView may not exist yet. Always wait for a known stable element before interacting — add a `data-testid="app-ready"` marker to the root component and use it as the readiness gate.
+After VSCode launches, the extension activates asynchronously. Always wait for a known stable element before interacting. Add a `data-testid="app-ready"` marker to the root component and use it as the readiness gate.
 
 ### 3. File Path Inputs Accept Direct Text — Use This
-**All file path input fields in the UI support direct text input.** This completely bypasses the OS native file dialog problem. Use `fill()` to set paths programmatically. Point them at files in `../data/` — those test datasets already exist. Do not attempt to automate OS file dialogs.
+**All file path inputs in the UI support direct text entry.** Use `fill()` with absolute paths pointing to `../data/mnist/`. Do not interact with the folder-picker icon buttons. Do not attempt to automate OS file dialogs.
 
-### 4. State May Persist Between Tests
-The extension may retain project state (last opened project, history table entries) across test runs. Design the test setup to handle a dirty initial state, or implement a reset mechanism. History tables growing unboundedly across runs will eventually break assertions about row counts.
+### 4. Import New Model is Not Automatable
+"Import New Model" on Select Model page opens either an OS-native file dialog (Windows/WSL) or an SSH-based remote plugin (Linux). Neither is automatable with Playwright. Tests must pre-seed model history or use a model already present in History Files.
 
-### 5. Script Execution Takes Variable Time
-Quantize and Convert trigger real backend scripts. On slow machines or CI, these can take significantly longer than locally. Use `waitForSelector` with generous timeouts on result elements rather than fixed waits. Never use `page.waitForTimeout()`.
+### 5. State Persists Between Tests
+The extension retains project state and history table entries across runs. History tables grow unboundedly. Do not assert on absolute row counts — assert only on the presence and content of the most recently added row. Design setup steps to tolerate a dirty initial state.
 
-### 6. Selector Strategy
-Add `data-testid` attributes to interactive elements and assertion targets in the React components. Keep it minimal — only elements tests need to `click()`, `fill()`, or `expect().toBeVisible()`. Use text-based selectors only for truly stable, non-internationalizable labels.
+### 6. Script Execution Time is Variable
+Quantize and Convert trigger real backend scripts. Use `waitForSelector` with generous timeouts. Never use `page.waitForTimeout()`.
+
+### 7. Selector Strategy
+Add `data-testid` attributes only to elements tests need to `click()`, `fill()`, or assert visibility on. Keep the total count minimal. Prefer stable text selectors for elements with non-translatable labels.
 
 ## Constraints on `code/`
 
-- **Do not modify business logic.** The only acceptable changes to `code/` are adding `data-testid` attributes to JSX elements.
-- Keep a list of every file you modify in `code/` so changes are easy to review and revert.
-- The extension must build cleanly (`build.sh` / `build.bat`) after any modifications.
+- **Do not modify business logic.** Only acceptable change: adding `data-testid` attributes to JSX elements.
+- Track every modified file so changes can be reviewed and reverted independently.
+- The extension must build cleanly after modifications.
 
 ## How to Start
 
-1. Read `flow.md` and all screenshots carefully — this is your ground truth for UI behavior
-2. Explore `code/src/frontEnd/routes/` to understand each page's component structure
-3. Explore `code/src/backEnd/panels/` to understand how WebView panels are managed
-4. Check `code/package.json` and `build.sh` to understand the build output location
-5. Look at `data/` to understand what test files are available
-6. **Propose a complete plan** (project structure, library choices, data-testid list, test case inventory) before writing any code or modifying any files
+1. Read `flows/overview.md` for the complete picture
+2. Read each flow file for the pages in scope (00-home through 03-convert, CPU PTQ only)
+3. Explore `code/src/frontEnd/routes/` to map flow descriptions to actual component structure
+4. Explore `code/src/backEnd/panels/` to understand WebView lifecycle
+5. Check `code/package.json` and `build.sh` for build output location
+6. **Propose a complete plan** before writing any code or modifying any files
 7. Wait for confirmation, then implement
