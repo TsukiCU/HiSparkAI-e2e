@@ -113,6 +113,15 @@ Add `data-testid` attributes only to elements tests need to `click()`, `fill()`,
 - Track every modified file so changes can be reviewed and reverted independently.
 - The extension must build cleanly after modifications.
 
+## Debugging & Observability Requirements
+
+Every test file must be written to maximize failure visibility:
+
+1. **Named steps:** Wrap every logical step in `await test.step('description', async () => { ... })`. Failure reports must show which named step failed, not just a line number.
+2. **Assertion messages:** Every `expect()` call must include a descriptive second argument, e.g. `expect(el, 'History Files heading should be visible').toBeVisible()`.
+3. **playwright.config.ts** must be configured with `screenshot: 'only-on-failure'`, `video: 'retain-on-failure'`, and `trace: 'retain-on-failure'` so failures produce artifacts automatically.
+4. **Console capture:** The webview fixture must forward WebView console messages to the test output so frontend errors appear in the failure log.
+
 ## Working Convention
 
 After every session where you write or modify files, end your response with a **Brief Summary** section listing:
