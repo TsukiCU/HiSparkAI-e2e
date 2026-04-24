@@ -29,7 +29,7 @@
  * automated seed step — a prior manual import is required.
  */
 
-import { FrameLocator } from 'playwright';
+import { type FrameLocator, type ConsoleMessage } from '@playwright/test';
 import { test as baseTest, expect } from './base';
 
 // How long to wait for the outer iframe to appear after issuing the command.
@@ -124,6 +124,20 @@ export const test = baseTest.extend<WebviewFixtures>({
     await inner
       .locator('.ant-steps')
       .waitFor({ state: 'visible', timeout: 10_000 });
+
+    // ── Step 7: Forward WebView console output to the test runner ────────────
+    // Playwright captures Page console events from the Electron window.
+    // Messages originating inside the double-nested iframe bubble up as page
+    // console events, so this single listener covers React errors, unhandled
+    // promise rejections, and any console.log calls made in the frontend.
+    // The listener is attached per-fixture scope, so it only appears in the
+    // output for the currently running test.
+    electronPage.on('console', (msg: ConsoleMessage) => {
+      console.log(`[webview] ${msg.type()}: ${msg.text()}`);
+    });
+    electronPage.on('pageerror', (err: Error) => {
+      console.log(`[webview] uncaught error: ${err.message}`);
+    });
 
     await use(inner);
   },

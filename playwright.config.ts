@@ -17,8 +17,9 @@ const config = defineConfig({
   reporter: [['list'], ['html', { outputFolder: path.resolve(__dirname, 'test-results'), open: 'never' }]],
   globalSetup: path.resolve(__dirname, 'helpers', 'globalSetup.ts'),
   use: {
-    // Electron tests do not use a browser — settings here are for type completeness only.
-    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video:      'retain-on-failure',
+    trace:      'retain-on-failure',
   },
 });
 
