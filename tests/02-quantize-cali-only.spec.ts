@@ -61,8 +61,7 @@ test.describe('Quantize — Calibration Only (Mode 2)', () => {
     // We target the first path input under the "Calibration Inputs" heading.
     await test.step('Fill Calibration Inputs path', async () => {
       const calibSection = webview
-        .locator('.inputs-class-cpu')
-        .filter({ hasText: 'Calibration Inputs' });
+        .locator('[data-testid="calibration-inputs-section"]');
 
       const calibPathInput = calibSection
         .locator('input[type="text"]')
@@ -98,7 +97,7 @@ test.describe('Quantize — Calibration Only (Mode 2)', () => {
     // ── 5. Assert the most recent row contains the model name ─────────────────
     // The model name column displays the filename. We assert it's non-empty.
     await test.step('Assert most recent result row has a non-empty model name', async () => {
-      const modelCell = firstRow.locator('.model-cell__name');
+      const modelCell = firstRow.locator('[data-testid="history-row-model-name"]');
       await expect(
         modelCell,
         'Model name cell in the most recent Quantization Result History row should not be empty'

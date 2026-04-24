@@ -32,7 +32,7 @@ test.describe('Full Pipeline Smoke Test', () => {
         .waitFor({ state: 'visible', timeout: TIMEOUTS.UI });
 
       // Capture the model filename for later assertion
-      const modelNameEl = webview.locator('.config-card .sub-title span').first();
+      const modelNameEl = webview.locator('[data-testid="history-model-name"]').first();
       const modelNameText = await modelNameEl.textContent({ timeout: TIMEOUTS.UI });
       const filename = modelNameText?.split(' (')[0]?.trim() ?? '';
       expect(filename, 'Model filename extracted from history entry should be non-empty').toBeTruthy();
@@ -47,7 +47,7 @@ test.describe('Full Pipeline Smoke Test', () => {
 
       // Confirm the model name carried through
       await expect(
-        webview.locator('.model-selected span', { hasText: filename }),
+        webview.locator('[data-testid="model-selected-name"]', { hasText: filename }),
         `Model filename "${filename}" should be displayed in the model-selected area on Quantize`
       ).toBeVisible({ timeout: TIMEOUTS.UI });
 
@@ -87,7 +87,7 @@ test.describe('Full Pipeline Smoke Test', () => {
     // ENVIRONMENT PREREQUISITE: backend conversion toolchain must be installed.
     const firstConvertRow = await test.step('Wait for result row in Conversion Result History', async () => {
       const convertHistoryCard = webview
-        .locator('.results-style')
+        .locator('[data-testid="convert-results"]')
         .locator('[data-testid="history-section"]');
 
       const row = convertHistoryCard.locator('.ant-table-row').first();
@@ -96,7 +96,7 @@ test.describe('Full Pipeline Smoke Test', () => {
     });
 
     await test.step('Assert most recent Conversion Result History row has a non-empty model name', async () => {
-      const modelCell = firstConvertRow.locator('.model-cell__name');
+      const modelCell = firstConvertRow.locator('[data-testid="history-row-model-name"]');
       await expect(
         modelCell,
         'Model name cell in the most recent Conversion Result History row should not be empty'
@@ -105,7 +105,7 @@ test.describe('Full Pipeline Smoke Test', () => {
 
     // ── Step 5: Assert Conversion Result bar chart renders ────────────────────
     await test.step('Assert Conversion Result bar chart canvas is visible', async () => {
-      const resultPanel = webview.locator('.results-style');
+      const resultPanel = webview.locator('[data-testid="convert-results"]');
       await expect(
         resultPanel.locator('canvas'),
         'Conversion Result bar chart (canvas element) should be visible after a successful conversion'

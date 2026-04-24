@@ -64,7 +64,7 @@ test.describe('Convert — Execute Conversion', () => {
     // a History component). We locate it by its proximity to "Conversion Result History".
     const firstConvertRow = await test.step('Wait for result row in Conversion Result History', async () => {
       const convertHistoryCard = webview
-        .locator('.results-style')
+        .locator('[data-testid="convert-results"]')
         .locator('[data-testid="history-section"]');
 
       const row = convertHistoryCard.locator('.ant-table-row').first();
@@ -74,7 +74,7 @@ test.describe('Convert — Execute Conversion', () => {
 
     // ── 3. Assert the most recent row has a non-empty model name ──────────────
     await test.step('Assert most recent Conversion Result History row has a non-empty model name', async () => {
-      const modelCell = firstConvertRow.locator('.model-cell__name');
+      const modelCell = firstConvertRow.locator('[data-testid="history-row-model-name"]');
       await expect(
         modelCell,
         'Model name cell in the most recent Conversion Result History row should not be empty'
@@ -84,7 +84,7 @@ test.describe('Convert — Execute Conversion', () => {
     // ── 4. Assert the Conversion Result bar chart canvas renders ─────────────
     // ConvertStarkGraph renders a canvas element when convertCfgDataFirst is populated.
     await test.step('Assert Conversion Result bar chart canvas is visible', async () => {
-      const resultPanel = webview.locator('.results-style');
+      const resultPanel = webview.locator('[data-testid="convert-results"]');
       await expect(
         resultPanel.locator('canvas'),
         'Conversion Result bar chart (canvas element) should be visible after a successful conversion'

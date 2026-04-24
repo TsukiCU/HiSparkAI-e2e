@@ -61,7 +61,7 @@ test.describe('Quantize — Calibration + Validation, No Labels (Mode 3)', () =>
     // ── 2. Assert Validation Inputs section is now visible ────────────────────
     await test.step('Assert Validation Inputs section is visible after toggle is enabled', async () => {
       await expect(
-        webview.locator('.inputs-class-cpu', { hasText: 'Validation Inputs' }),
+        webview.locator('[data-testid="validation-inputs-section"]'),
         'Validation Inputs section should appear in the DOM when the Validation toggle is on'
       ).toBeVisible({ timeout: TIMEOUTS.UI });
     });
@@ -69,8 +69,7 @@ test.describe('Quantize — Calibration + Validation, No Labels (Mode 3)', () =>
     // ── 3. Fill Calibration Inputs path ──────────────────────────────────────
     await test.step('Fill Calibration Inputs path', async () => {
       const calibSection = webview
-        .locator('.inputs-class-cpu')
-        .filter({ hasText: 'Calibration Inputs' });
+        .locator('[data-testid="calibration-inputs-section"]');
 
       const calibPathInput = calibSection
         .locator('input[type="text"]')
@@ -87,8 +86,7 @@ test.describe('Quantize — Calibration + Validation, No Labels (Mode 3)', () =>
     // ── 4. Fill Validation Inputs path ────────────────────────────────────────
     await test.step('Fill Validation Inputs path', async () => {
       const validationSection = webview
-        .locator('.inputs-class-cpu')
-        .filter({ hasText: 'Validation Inputs' });
+        .locator('[data-testid="validation-inputs-section"]');
 
       const validationPathInput = validationSection
         .locator('input[type="text"]')
@@ -132,7 +130,7 @@ test.describe('Quantize — Calibration + Validation, No Labels (Mode 3)', () =>
 
     // ── 8. Assert model name cell is non-empty ────────────────────────────────
     await test.step('Assert most recent result row has a non-empty model name', async () => {
-      const modelCell = firstRow.locator('.model-cell__name');
+      const modelCell = firstRow.locator('[data-testid="history-row-model-name"]');
       await expect(
         modelCell,
         'Model name cell in the most recent Quantization Result History row should not be empty'

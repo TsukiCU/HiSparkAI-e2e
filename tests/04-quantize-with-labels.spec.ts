@@ -62,8 +62,7 @@ test.describe('Quantize — Calibration + Validation + Labels (Mode 4)', () => {
     // ── 2. Fill Calibration Inputs path ──────────────────────────────────────
     await test.step('Fill Calibration Inputs path', async () => {
       const calibSection = webview
-        .locator('.inputs-class-cpu')
-        .filter({ hasText: 'Calibration Inputs' });
+        .locator('[data-testid="calibration-inputs-section"]');
 
       const calibPathInput = calibSection.locator('input[type="text"]').first();
       await calibPathInput.fill(CALI_DIR);
@@ -77,8 +76,7 @@ test.describe('Quantize — Calibration + Validation + Labels (Mode 4)', () => {
     // ── 3. Fill Validation Inputs path ────────────────────────────────────────
     await test.step('Fill Validation Inputs path', async () => {
       const validationSection = webview
-        .locator('.inputs-class-cpu')
-        .filter({ hasText: 'Validation Inputs' });
+        .locator('[data-testid="validation-inputs-section"]');
 
       const validationPathInput = validationSection.locator('input[type="text"]').first();
       await validationPathInput.fill(VALI_DIR);
@@ -123,7 +121,7 @@ test.describe('Quantize — Calibration + Validation + Labels (Mode 4)', () => {
     // It is the file path input to the right of the Validation Labels Select.
     // Locate it by finding the input in the same row-ptq container as the Select.
     await test.step('Fill the Validation Labels file path', async () => {
-      const labelsRow = webview.locator('.row-ptq').filter({ hasText: 'Validation Labels' });
+      const labelsRow = webview.locator('[data-testid="validation-labels-row"]');
       const labelsFileInput = labelsRow.locator('input[type="text"]').last();
 
       await labelsFileInput.waitFor({ state: 'visible', timeout: TIMEOUTS.UI });
@@ -150,7 +148,7 @@ test.describe('Quantize — Calibration + Validation + Labels (Mode 4)', () => {
     });
 
     await test.step('Assert most recent result row has a non-empty model name', async () => {
-      const modelCell = firstRow.locator('.model-cell__name');
+      const modelCell = firstRow.locator('[data-testid="history-row-model-name"]');
       await expect(
         modelCell,
         'Model name cell in the most recent Quantization Result History row should not be empty'

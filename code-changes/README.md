@@ -88,10 +88,9 @@ and contains one of these files. Without it, the extension opens in `target=NONE
 |---------|--------|-------------|
 | `<section className="history">` | Added `data-testid="history-section"` | All TCs: wait for result rows |
 | "Next" `<button>` inside `<NavLink>` | Added `data-testid="result-next-btn"` | TC-06: navigate from Quantize result to Convert |
+| `<div className="model-cell__name hover">` | Added `data-testid="history-row-model-name"` | TC-03–TC-08: assert model name in result row |
 
-**Why for history-section:** Tests wait for a new row to appear after triggering Quantize/Convert. The `[data-testid="history-section"] .ant-table-row` compound selector is the stable way to scope row lookups to the result table vs. any other table on the page.
-
-**Why for result-next-btn:** There are multiple "Next" buttons on the Quantize page (one per history row, plus the history model-selection Next). The testid on the result-row Next (inside `History.tsx`) disambiguates it from the `history-next-btn` in `SelectModel.tsx`.
+**Why for history-row-model-name:** `.model-cell__name` is a project CSS class that could be renamed. A testid makes the assertion independent of class names.
 
 ---
 
@@ -112,13 +111,20 @@ and contains one of these files. Without it, the extension opens in `target=NONE
 | `data-testid` value | File | Test(s) |
 |--------------------|------|---------|
 | `app-ready` | app.tsx | All (fixture gate) |
-| `history-delete-btn` | SelectModel.tsx | TC-01 cleanup |
-| `history-next-btn` | SelectModel.tsx | TC-01 |
+| `history-model-name` | SelectModel.tsx | TC-01, TC-08: read model filename from history entry |
+| `history-delete-btn` | SelectModel.tsx | Future cleanup tests |
+| `history-next-btn` | SelectModel.tsx | TC-01–TC-08 (setup navigation) |
 | `skip-quantization-btn` | Quantize.tsx | TC-02, TC-08 |
 | `quantize-btn` | Quantize.tsx | TC-03, TC-04, TC-05 |
-| `validation-labels-select` | Quantize.tsx | TC-05 |
+| `calibration-inputs-section` | Quantize.tsx | TC-03, TC-04, TC-05: fill calibration path |
+| `validation-inputs-section` | Quantize.tsx | TC-04, TC-05: fill validation path |
+| `validation-labels-row` | Quantize.tsx | TC-05: locate labels file input |
+| `validation-labels-select` | Quantize.tsx | TC-04, TC-05 |
 | `validation-toggle` | Quantize.tsx (via Switch.tsx) | TC-03, TC-04, TC-05 setup |
-| `histogram-section` | Quantize.tsx | TC-05 |
+| `model-selected-name` | Quantize.tsx + Convert.tsx | TC-01, TC-08: assert model carried through |
+| `histogram-section` | Quantize.tsx | TC-04, TC-05 |
 | `convert-btn` | Convert.tsx | TC-07, TC-08 |
+| `convert-results` | Convert.tsx | TC-07, TC-08: scope history + chart lookups |
 | `history-section` | History.tsx | TC-03–TC-08 |
 | `result-next-btn` | History.tsx | TC-06 |
+| `history-row-model-name` | History.tsx | TC-03–TC-08: assert model name in result row |

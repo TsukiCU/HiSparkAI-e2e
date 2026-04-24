@@ -44,7 +44,7 @@ test.describe('Select Model — from History Files', () => {
     // ── 3. Capture the model name from the first entry for assertion later ────
     const modelFilename = await test.step('Capture model filename from first history entry', async () => {
       const modelNameEl = webview
-        .locator('.config-card .sub-title span')
+        .locator('[data-testid="history-model-name"]')
         .first();
       const modelNameText = await modelNameEl.textContent({ timeout: TIMEOUTS.UI });
       // modelNameText is e.g. "mnist-12.onnx (on Windows)"
@@ -72,7 +72,7 @@ test.describe('Select Model — from History Files', () => {
     // ── 6. Assert the model filename is shown on the Quantize page ────────────
     await test.step('Assert selected model filename is shown on Quantize page', async () => {
       await expect(
-        webview.locator('.model-selected span', { hasText: modelFilename }),
+        webview.locator('[data-testid="model-selected-name"]', { hasText: modelFilename }),
         `Model filename "${modelFilename}" should be displayed in the model-selected area on Quantize`
       ).toBeVisible({ timeout: TIMEOUTS.UI });
     });
