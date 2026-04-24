@@ -8,31 +8,27 @@
  *   VSCODE_EXECUTABLE_PATH       — absolute path to the VSCode Electron binary
  *   EXTENSION_DEVELOPMENT_PATH   — absolute path to the code/ directory
  *   DATA_DIR                     — absolute path to the repo data/ directory
+ *   WORKSPACE_PATH               — absolute path to the SDK workspace folder
  *
  * HOW THE PANEL OPENS
  * -------------------
- * extension.ts lines 367-369 only auto-fires `HisparkAI.show` when
- * detectTargetFromWorkspace() returns 'CPU' or 'NPU'.  That function looks for:
+ * extension.ts only auto-fires `HisparkAI.show` when detectTargetFromWorkspace()
+ * returns 'CPU' or 'NPU'. That function checks for sentinel files inside the
+ * opened workspace:
  *
- *   <workspaceRoot>/build/config/target_config/ws63/ws63.json   → CPU
- *   <workspaceRoot>/build/config/target_config/3322/3322.json   → NPU
+ *   <WORKSPACE_PATH>/build/config/target_config/ws63/ws63.json   → CPU
+ *   <WORKSPACE_PATH>/build/config/target_config/3322/3322.json   → NPU
  *
- * Without a workspace containing one of these files, target='NONE' and
- * extension.ts opens the WelcomePage instead of the chip config UI.
+ * WORKSPACE_PATH must point to the real SDK project directory already on disk.
+ * It is passed as the positional workspace argument to VSCode at launch, which
+ * causes extension.ts to detect the target and call HisparkAI.show automatically.
  *
- * Fix: createCpuWorkspace() builds a minimal temp directory with the CPU
- * sentinel file and passes it as the positional workspace argument to VSCode.
- * This makes extension.ts detect 'CPU' and call HisparkAI.show automatically
- * during activation — no keyboard or IPC tricks needed.
- *
- * The webview fixture (webview.ts) adds a belt-and-suspenders fallback via
- * the command palette in case the auto-fire races with a slow activation.
+ * The webview fixture (webview.ts) adds a belt-and-suspenders fallback via the
+ * command palette in case the auto-fire races with a slow activation.
  */
 
 import { test as base, expect } from '@playwright/test';
 import { _electron as electron, ElectronApplication, Page } from 'playwright';
-import * as fs from 'fs';
-import * as os from 'os';
 import * as path from 'path';
 import * as dotenv from 'dotenv';
 
@@ -52,29 +48,12 @@ function requireEnv(name: string): string {
 export const VSCODE_EXECUTABLE_PATH = requireEnv('VSCODE_EXECUTABLE_PATH');
 export const EXTENSION_DEVELOPMENT_PATH = requireEnv('EXTENSION_DEVELOPMENT_PATH');
 export const DATA_DIR = requireEnv('DATA_DIR');
+export const WORKSPACE_PATH = requireEnv('WORKSPACE_PATH');
 
 // Derived data paths — use path.resolve to avoid cross-platform issues.
 export const CALI_DIR = path.resolve(DATA_DIR, 'cali');
 export const VALI_DIR = path.resolve(DATA_DIR, 'vali');
 export const LABEL_CSV = path.resolve(DATA_DIR, 'label.csv');
-
-/**
- * Create a minimal temporary workspace that satisfies detectTargetFromWorkspace()
- * in extension.ts so the extension activates in CPU mode.
- *
- * extension.ts:53  const cpuRelPath = path.join('build','config','target_config','ws63','ws63.json');
- * extension.ts:61  if (cpuExist && !npuExist) return 'CPU';
- *
- * The file content is irrelevant — only fs.existsSync is called on it.
- * Returns the workspace root path. Caller is responsible for cleanup.
- */
-export function createCpuWorkspace(): string {
-  const wsRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'hisparkai-e2e-ws-'));
-  const sentinelDir = path.resolve(wsRoot, 'build', 'config', 'target_config', 'ws63');
-  fs.mkdirSync(sentinelDir, { recursive: true });
-  fs.writeFileSync(path.resolve(sentinelDir, 'ws63.json'), '{}');
-  return wsRoot;
-}
 
 type BaseFixtures = {
   app: ElectronApplication;
@@ -83,14 +62,12 @@ type BaseFixtures = {
 
 export const test = base.extend<BaseFixtures>({
   app: async ({}, use) => {
-    const wsRoot = createCpuWorkspace();
-
     const app = await electron.launch({
       executablePath: VSCODE_EXECUTABLE_PATH,
       args: [
-        // Workspace path as positional arg — makes detectTargetFromWorkspace()
-        // return 'CPU', which triggers HisparkAI.show automatically.
-        wsRoot,
+        // Real SDK workspace — its sentinel file makes extension.ts detect
+        // 'CPU' or 'NPU' and call HisparkAI.show automatically on activation.
+        WORKSPACE_PATH,
         `--extensionDevelopmentPath=${EXTENSION_DEVELOPMENT_PATH}`,
         '--disable-workspace-trust',
         '--no-sandbox',
@@ -102,8 +79,6 @@ export const test = base.extend<BaseFixtures>({
     });
 
     await use(app);
-
-    try { fs.rmSync(wsRoot, { recursive: true, force: true }); } catch { /* ignore */ }
     await app.close();
   },
 

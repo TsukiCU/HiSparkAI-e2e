@@ -37,6 +37,22 @@ export default function globalSetup(): void {
     );
   }
 
+  const workspacePath = process.env['WORKSPACE_PATH'];
+  if (!workspacePath) {
+    throw new Error(
+      '[globalSetup] WORKSPACE_PATH is not set.\n' +
+      'Set it to the SDK workspace folder that contains the CPU/NPU sentinel file.\n' +
+      'Copy e2e/.env.example to e2e/.env and fill in the required variables.'
+    );
+  }
+
+  if (!fs.existsSync(workspacePath)) {
+    throw new Error(
+      `[globalSetup] WORKSPACE_PATH does not exist on disk:\n  ${workspacePath}\n` +
+      'Verify the path in your .env file.'
+    );
+  }
+
   const dataDir = process.env['DATA_DIR'];
   if (!dataDir) {
     throw new Error(

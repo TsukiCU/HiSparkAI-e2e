@@ -5,6 +5,31 @@ The patch at `frontend.patch` can be applied with `git apply` or reviewed file-b
 
 ---
 
+## Environment Prerequisites
+
+Before running tests, copy `e2e/.env.example` to `e2e/.env` and set all four variables:
+
+| Variable | Purpose |
+|----------|---------|
+| `VSCODE_EXECUTABLE_PATH` | Absolute path to the VSCode Electron binary |
+| `EXTENSION_DEVELOPMENT_PATH` | Absolute path to `code/` (must contain `dist/extension.js`) |
+| `DATA_DIR` | Absolute path to the repo `data/` directory |
+| `WORKSPACE_PATH` | Absolute path to the SDK workspace folder (see below) |
+
+### `WORKSPACE_PATH` — required for the panel to open
+
+`extension.ts` only opens the chip config UI when it detects a CPU or NPU target.
+Detection is done by looking for sentinel files inside the opened workspace:
+
+- **CPU:** `<WORKSPACE_PATH>/build/config/target_config/ws63/ws63.json`
+- **NPU:** `<WORKSPACE_PATH>/build/config/target_config/3322/3322.json`
+
+`WORKSPACE_PATH` must point to a real SDK project directory that already exists on disk
+and contains one of these files. Without it, the extension opens in `target=NONE`
+(WelcomePage) and no chip config UI appears — all tests will fail.
+
+---
+
 ## Modified Files
 
 ### 1. `code/src/frontEnd/routes/app.tsx`
