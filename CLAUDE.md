@@ -113,6 +113,20 @@ Add `data-testid` attributes only to elements tests need to `click()`, `fill()`,
 - Track every modified file so changes can be reviewed and reverted independently.
 - The extension must build cleanly after modifications.
 
+## Working Convention
+
+After every session where you write or modify files, end your response with a **Brief Summary** section listing:
+- Which files were created or modified
+- One line per file describing what changed and why
+
+Example format:
+```
+## Brief Summary
+- `fixtures/base.ts` — replaced temp workspace creation with env-var-driven workspace path
+- `.env.example` — added WORKSPACE_PATH variable
+- `e2e/CLAUDE.md` — added working convention section
+```
+
 ## How to Start
 
 1. Read `flows/overview.md` for the complete picture
