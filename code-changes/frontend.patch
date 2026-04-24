@@ -9,6 +9,17 @@
        <HashRouter>
          <Routes>
            <Route path="/" element={<Navbar />}>
+--- a/code/src/frontEnd/welcome/projectList.tsx
++++ b/code/src/frontEnd/welcome/projectList.tsx
+@@ -142,7 +142,7 @@
+       render: (_: any, record: ProjectData): JSX.Element => {
+         return (
+           <span>
+-            <a onClick={(): void => onClickOpen(record)}>{t('open')}</a>
++            <a data-testid="project-open-btn" onClick={(): void => onClickOpen(record)}>{t('open')}</a>
+             <a style={{ marginLeft: '10px' }} onClick={(): void => onClickDelete(record)}>{t('delete')}</a>
+           </span>
+         );
 --- a/code/src/frontEnd/routes/SelectModel.tsx
 +++ b/code/src/frontEnd/routes/SelectModel.tsx
 @@ -116,8 +116,8 @@

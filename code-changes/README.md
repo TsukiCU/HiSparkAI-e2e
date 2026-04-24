@@ -110,7 +110,8 @@ and contains one of these files. Without it, the extension opens in `target=NONE
 
 | `data-testid` value | File | Test(s) |
 |--------------------|------|---------|
-| `app-ready` | app.tsx | All (fixture gate) |
+| `app-ready` | app.tsx | All (fixture gate — App component only) |
+| `project-open-btn` | welcome/projectList.tsx | Fixture: navigate from Home to Select Model |
 | `history-model-name` | SelectModel.tsx | TC-01, TC-08: read model filename from history entry |
 | `history-delete-btn` | SelectModel.tsx | Future cleanup tests |
 | `history-next-btn` | SelectModel.tsx | TC-01–TC-08 (setup navigation) |
@@ -127,4 +128,5 @@ and contains one of these files. Without it, the extension opens in `target=NONE
 | `convert-results` | Convert.tsx | TC-07, TC-08: scope history + chart lookups |
 | `history-section` | History.tsx | TC-03–TC-08 |
 | `result-next-btn` | History.tsx | TC-06 |
+| `history-row-model-name` | History.tsx | TC-03–TC-08: assert model name in result row |
 | `history-row-model-name` | History.tsx | TC-03–TC-08: assert model name in result row |
