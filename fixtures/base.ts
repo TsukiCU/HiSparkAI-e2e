@@ -1,14 +1,34 @@
 /**
  * base.ts — Shared Playwright test fixture
  *
- * Launches VSCode (Electron) with the HiSpark Studio AI extension loaded in
- * development mode and exposes the app + main window page to derived fixtures.
+ * Launches VSCode / Cursor (Electron) with the HiSpark Studio AI extension
+ * loaded in development mode and exposes the app + main window page to
+ * derived fixtures.
  *
  * Required environment variables (set in e2e/.env, see .env.example):
- *   VSCODE_EXECUTABLE_PATH       — absolute path to the VSCode Electron binary
+ *   VSCODE_EXECUTABLE_PATH       — absolute path to the VSCode/Cursor binary
  *   EXTENSION_DEVELOPMENT_PATH   — absolute path to the code/ directory
  *   DATA_DIR                     — absolute path to the repo data/ directory
  *   WORKSPACE_PATH               — absolute path to the SDK workspace folder
+ *
+ * WHY --user-data-dir IS REQUIRED
+ * --------------------------------
+ * VSCode and Cursor enforce a per-user single-instance lock keyed on the
+ * user-data directory. When a second process starts with the same directory,
+ * it detects the running instance, forwards its arguments to it, and exits
+ * immediately. Playwright connects to the exited process, finds no windows,
+ * and throws:
+ *
+ *   "electronApplication.firstWindow: Target page, context or browser
+ *    has been closed"
+ *
+ * Passing --user-data-dir pointing to a dedicated test profile directory
+ * bypasses the lock. The directory is fixed (not a temp dir) so it persists
+ * across runs — VSCode's first-run experience (welcome tabs, telemetry
+ * prompts) only occurs once rather than on every test run.
+ *
+ * The profile directory is e2e/.vscode-test-profile/ (git-ignored).
+ * VSCode creates it automatically on first launch; no manual setup needed.
  *
  * HOW THE PANEL OPENS
  * -------------------
@@ -55,6 +75,12 @@ export const CALI_DIR = path.resolve(DATA_DIR, 'cali');
 export const VALI_DIR = path.resolve(DATA_DIR, 'vali');
 export const LABEL_CSV = path.resolve(DATA_DIR, 'label.csv');
 
+// Fixed profile directory that persists across runs: e2e/.vscode-test-profile/
+// Resolved relative to playwright.config.ts (process.cwd() is the e2e/ dir
+// when Playwright runs). VSCode creates the directory on first launch.
+// Listed in e2e/.gitignore — never committed.
+const USER_DATA_DIR = path.resolve(process.cwd(), '.vscode-test-profile');
+
 type BaseFixtures = {
   app: ElectronApplication;
   electronPage: Page;
@@ -65,6 +91,9 @@ export const test = base.extend<BaseFixtures>({
     const app = await electron.launch({
       executablePath: VSCODE_EXECUTABLE_PATH,
       args: [
+        // Fixed profile dir — bypasses the single-instance lock without
+        // creating a new throwaway directory on every run.
+        `--user-data-dir=${USER_DATA_DIR}`,
         // Real SDK workspace — its sentinel file makes extension.ts detect
         // 'CPU' or 'NPU' and call HisparkAI.show automatically on activation.
         WORKSPACE_PATH,
