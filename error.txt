@@ -1,33 +1,35 @@
+D:\tsuki\HiSparkAI\e2e>npx playwright test
+[globalSetup] All pre-flight checks passed.
 
 Running 1 test using 1 worker
 
-  ✘  1 …1: history entry is visible and Next navigates to Quantize (2.4s)
+  ✘  1 …ec.ts:22:7 › Select Model — from History Files › TC-01: history entry is visible and Next navigates to Quantize (2.4s)
 
 
   1) tmp\00-select-model.spec.ts:22:7 › Select Model — from History Files › TC-01: history entry is visible and Next navigates to Quantize 
 
     Error: electronApplication.firstWindow: Target page, context or browser has been closed
 
-       at ..\fixtures\base.ts:86
+       at ..\fixtures\base.ts:115
 
-      84 |
-      85 |   electronPage: async ({ app }, use) => {
-    > 86 |     const page = await app.firstWindow();
-         |                            ^
-      87 |     await use(page);
-      88 |   },
-      89 | });
-        at Object.electronPage (D:\tsuki\HiSparkAI\e2e\fixtures\base.ts:86:28)
+      113 |
+      114 |   electronPage: async ({ app }, use) => {
+    > 115 |     const page = await app.firstWindow();
+          |                            ^
+      116 |     await use(page);
+      117 |   },
+      118 | });
+        at Object.electronPage (D:\tsuki\HiSparkAI\e2e\fixtures\base.ts:115:28)
 
     Error Context: test-results\00-select-model-Select-Mod-6ed88--Next-navigates-to-Quantize\error-context.md
 
-    attachment #2: trace (application/zip) ──────────────────────────────
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
     test-results\00-select-model-Select-Mod-6ed88--Next-navigates-to-Quantize\trace.zip
     Usage:
 
         npx playwright show-trace test-results\00-select-model-Select-Mod-6ed88--Next-navigates-to-Quantize\trace.zip
 
-    ─────────────────────────────────────────────────────────────────────
+    ────────────────────────────────────────────────────────────────────────────────────────────────
 
   1 failed
     tmp\00-select-model.spec.ts:22:7 › Select Model — from History Files › TC-01: history entry is visible and Next navigates to Quantize 
@@ -35,3 +37,4 @@ Running 1 test using 1 worker
 To open last HTML report run:
 
   npx playwright show-report test-results
+
