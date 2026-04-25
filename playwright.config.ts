@@ -6,7 +6,7 @@ import * as dotenv from 'dotenv';
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const config = defineConfig({
-  testDir: path.resolve(__dirname, 'tests'),
+  testDir: path.resolve(__dirname, 'tmp'),
   timeout: 180_000,
   globalTimeout: 600_000,
   expect: {
