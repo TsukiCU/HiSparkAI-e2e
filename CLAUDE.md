@@ -75,6 +75,31 @@ This is the only fully documented path. Do not write tests for undocumented vari
 
 ## Critical Technical Gotchas — Read Before Writing Any Test
 
+### 0. Extension Launch Requires projectdata.json Pre-Seeding
+
+`extension.ts` `activate()` reads `<USER_DATA_DIR>/User/globalStorage/projectdata.json`
+and looks for an entry where `item.SDK === workspaceFolderPath && item.active`. If no
+matching entry exists, it **overrides `target` to `'NONE'`** regardless of what
+`detectTargetFromWorkspace()` returned, causing the extension to render `WelcomePage`
+(the project list) instead of the chip config panel.
+
+With a fresh `e2e/.vscode-test-profile/` this file does not exist, so target is always
+forced to `'NONE'` and no panel ever opens.
+
+**Fix:** `fixtures/base.ts` calls `seedProjectData()` before spawning VSCode. This writes
+a minimal entry into `projectdata.json` so `isActiveProjectFound = true` and `target`
+stays `'CPU'`.
+
+**Path normalisation:** VSCode's `workspace.workspaceFolders[0].uri.fsPath` on Windows
+produces backslash paths with a **lowercase drive letter** (e.g. `d:\tsuki\SDK\ws63`).
+`WORKSPACE_PATH` in `.env` may use uppercase. The seeding function normalises to
+lowercase drive letter on Windows so `item.SDK` matches exactly.
+
+If `[data-testid="app-ready"]` times out during fixture setup, the most likely cause is
+a path normalisation mismatch between `WORKSPACE_PATH` in `.env` and what VSCode reports.
+Print `normaliseWorkspacePath(WORKSPACE_PATH)` and compare against what VSCode shows in
+its own workspace title bar.
+
 ### 1. WebView is Double-Nested
 The React app does NOT live directly on the page. It's nested two levels deep:
 ```
