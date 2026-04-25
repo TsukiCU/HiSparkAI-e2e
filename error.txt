@@ -1,29 +1,35 @@
-D:\tsuki\HiSparkAI\e2e>npx playwright test
 [globalSetup] All pre-flight checks passed.
 
 Running 1 test using 1 worker
 
-  ✘  1 …ec.ts:22:7 › Select Model — from History Files › TC-01: history entry is visible and Next navigates to Quantize (2.4s)
+  ✘  1 …pec.ts:22:7 › Select Model — from History Files › TC-01: history entry is visible and Next navigates to Quantize (33.7s)
 
 
   1) tmp\00-select-model.spec.ts:22:7 › Select Model — from History Files › TC-01: history entry is visible and Next navigates to Quantize 
 
-    Error: electronApplication.firstWindow: Target page, context or browser has been closed
+    TimeoutError: locator.waitFor: Timeout 15000ms exceeded.
+    Call log:
+      - waiting for locator('iframe').contentFrame().locator('iframe#active-frame').contentFrame().locator('[data-testid="app-ready"]')
 
-       at ..\fixtures\base.ts:115
 
-      113 |
-      114 |   electronPage: async ({ app }, use) => {
-    > 115 |     const page = await app.firstWindow();
-          |                            ^
-      116 |     await use(page);
-      117 |   },
-      118 | });
-        at Object.electronPage (D:\tsuki\HiSparkAI\e2e\fixtures\base.ts:115:28)
+       at ..\fixtures\webview.ts:175
+
+      173 |       // with the project's target (CPU/NPU).  Wait for app-ready to appear,
+      174 |       // confirming App has mounted and the Select Model route is active.
+    > 175 |       await appReadyLocator.waitFor({ state: 'attached', timeout: NAVIGATE_TO_SELECT_MODEL_MS });
+          |                             ^
+      176 |     }
+      177 |
+      178 |     // At this point App is mounted.  Wait for History Files heading as the
+        at Object.webview (D:\tsuki\HiSparkAI\e2e\fixtures\webview.ts:175:29)
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\00-select-model-Select-Mod-6ed88--Next-navigates-to-Quantize\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
 
     Error Context: test-results\00-select-model-Select-Mod-6ed88--Next-navigates-to-Quantize\error-context.md
 
-    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
     test-results\00-select-model-Select-Mod-6ed88--Next-navigates-to-Quantize\trace.zip
     Usage:
 
@@ -37,4 +43,3 @@ Running 1 test using 1 worker
 To open last HTML report run:
 
   npx playwright show-report test-results
-
