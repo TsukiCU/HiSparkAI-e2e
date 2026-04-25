@@ -21,10 +21,10 @@ import { TIMEOUTS } from '../helpers/wait';
 test.describe('Select Model — from History Files', () => {
   test('TC-01: history entry is visible and Next navigates to Quantize', async ({ webview }) => {
     // ── 1. Assert we are on the Select Model page ────────────────────────────
-    await test.step('Assert Select Model page is visible (History Files heading)', async () => {
+    await test.step('Assert Select Model page is visible (History Files section)', async () => {
       await expect(
-        webview.locator('h2.section-title', { hasText: 'History Files' }),
-        'History Files heading should be visible on the Select Model page'
+        webview.locator('[data-testid="history-files-section"]'),
+        'History Files section should be visible on the Select Model page'
       ).toBeVisible({ timeout: TIMEOUTS.UI });
     });
 

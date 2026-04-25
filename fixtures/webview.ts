@@ -96,7 +96,7 @@ export const test = baseTest.extend<WebviewFixtures>({
 
     // ── Step 6: Confirm Select Model page is fully rendered ───────────────────
     await inner
-      .locator('h2.section-title', { hasText: 'History Files' })
+      .locator('[data-testid="history-files-section"]')
       .waitFor({ state: 'visible', timeout: SELECT_MODEL_READY_TIMEOUT_MS });
 
     // ── Step 7: Forward WebView console output to the test runner ────────────
